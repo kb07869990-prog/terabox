@@ -1,3 +1,6 @@
+[tool.poetry]
+package-mode = false
+
 [project]
 name = "terabox-bypass-tool"
 version = "1.0.0"
