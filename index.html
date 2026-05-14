@@ -1,545 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraBox Multi-Link Bypass Tool</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0a0a1a;--card:#141428;--card2:#1a1a35;--accent:#0d2847;--blue:#4361ee;--green:#06d6a0;--red:#ef476f;--yellow:#ffd166;--purple:#7b2ff7;--text:#e8e8e8;--muted:#7777aa;--border:#252545}
-        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-        .container{max-width:960px;margin:0 auto;padding:16px}
-        header{text-align:center;padding:24px 0 16px}
-        header h1{font-size:1.8rem;background:linear-gradient(135deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        header p{color:var(--muted);font-size:.9rem;margin-top:4px}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
-        .card h2{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-        textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-size:.88rem;font-family:'Consolas',monospace;outline:none;transition:border .2s;min-height:120px;resize:vertical}
-        textarea:focus{border-color:var(--blue)}
-        textarea::placeholder{color:#444466}
-        input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:.85rem;font-family:'Consolas',monospace;outline:none}
-        input[type=text]:focus{border-color:var(--blue)}
-        .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-        .btn{padding:10px 22px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
-        .btn:disabled{opacity:.4;cursor:not-allowed}
-        .btn-primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
-        .btn-primary:hover:not(:disabled){box-shadow:0 4px 15px rgba(67,97,238,.4);transform:translateY(-1px)}
-        .btn-green{background:var(--green);color:#111}
-        .btn-green:hover:not(:disabled){box-shadow:0 4px 15px rgba(6,214,160,.3);transform:translateY(-1px)}
-        .btn-red{background:var(--red);color:#fff}
-        .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
-        .btn-outline:hover{background:var(--card2)}
-        .btn-sm{padding:6px 14px;font-size:.82rem}
-        .results-area{margin-top:16px}
-        .file-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;border-left:3px solid var(--green)}
-        .file-card.err{border-left-color:var(--red)}
-        .file-card.warn{border-left-color:var(--yellow)}
-        .file-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
-        .file-card-title{font-size:.9rem;font-weight:600;color:var(--green);word-break:break-all;flex:1}
-        .file-card-meta{color:var(--muted);font-size:.8rem;flex-shrink:0}
-        .file-row{display:flex;align-items:center;gap:12px;padding:10px;background:var(--card2);border-radius:8px;margin-bottom:8px;flex-wrap:wrap}
-        .file-thumb{width:64px;height:48px;border-radius:6px;object-fit:cover;background:#222;flex-shrink:0}
-        .file-info{flex:1;min-width:150px}
-        .file-name{font-size:.85rem;word-break:break-all;margin-bottom:2px}
-        .file-details{font-size:.78rem;color:var(--muted)}
-        .file-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
-        .shortlink-result{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;border-left:3px solid var(--yellow)}
-        .shortlink-result .orig{color:var(--muted);font-size:.78rem;word-break:break-all}
-        .shortlink-result .resolved{font-size:.85rem;color:var(--yellow);word-break:break-all;margin-top:6px}
-        .shortlink-result .note{font-size:.8rem;color:var(--muted);margin-top:6px}
-        .error-msg{color:var(--red);font-size:.85rem;margin-top:6px}
-        .spinner{display:inline-block;width:16px;height:16px;border:2px solid #fff3;border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .cookie-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-        .cookie-row{display:flex;gap:8px;align-items:center}
-        .cookie-row input{flex:1}
-        .cookie-status{font-size:.8rem;margin-top:6px}
-        .cookie-status.active{color:var(--green)}
-        .cookie-status.inactive{color:var(--muted)}
-        .dl-manager{margin-top:16px}
-        .dl-summary{display:flex;gap:20px;flex-wrap:wrap;padding:10px 16px;background:var(--accent);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:.85rem;align-items:center}
-        .dl-summary b{color:var(--green);font-size:1rem}
-        .dl-item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
-        .dl-item.active{border-color:var(--blue);box-shadow:0 0 12px rgba(67,97,238,.15)}
-        .dl-item.done{border-color:var(--green)}
-        .dl-item.fail{border-color:var(--red)}
-        .dl-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-        .dl-item-name{font-size:.88rem;font-weight:600;word-break:break-all;flex:1;margin-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .dl-item-status{font-size:.78rem;padding:4px 12px;border-radius:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-        .dl-item-status.downloading{background:#0d2847;color:var(--blue)}
-        .dl-item-status.completed{background:#0a2e1a;color:var(--green)}
-        .dl-item-status.error{background:#2e0a1a;color:var(--red)}
-        .dl-item-status.queued{background:#2e2a0a;color:var(--yellow)}
-        .dl-item-status.retrying{background:#2e1a0a;color:#ff9f43}
-        .dl-pct{font-size:1.4rem;font-weight:700;color:var(--blue);margin:6px 0 2px;font-family:'Segoe UI',monospace}
-        .dl-pct.done-pct{color:var(--green)}
-        .dl-progress-bar{width:100%;height:14px;background:var(--bg);border-radius:7px;overflow:hidden;margin-bottom:10px;border:1px solid var(--border)}
-        .dl-progress-fill{height:100%;background:linear-gradient(90deg,#4361ee,#06d6a0);border-radius:7px;transition:width .3s;position:relative}
-        .dl-progress-fill.done-fill{background:linear-gradient(90deg,#06d6a0,#06d6a0)}
-        .dl-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
-        .dl-stat-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center}
-        .dl-stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
-        .dl-stat-val{font-size:.9rem;font-weight:700;color:var(--text);font-family:'Segoe UI',monospace}
-        .stats{display:flex;gap:16px;flex-wrap:wrap;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
-        .stat{display:flex;align-items:center;gap:6px;font-size:.85rem}
-        .stat b{font-size:1.1rem}
-        .hidden{display:none}
-        .help-text{color:var(--muted);font-size:.8rem;margin-top:8px;line-height:1.4}
-        a{color:var(--blue);text-decoration:none}
-        a:hover{text-decoration:underline}
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="VL Helper" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <title>Video Link Helper</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --warn: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.15rem; margin: 0 0 8px; font-weight: 700; }
+    p { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #0f172a;
+    }
+    button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
+    button:active { opacity: 0.85; }
+    video {
+      width: 100%;
+      max-height: 42vh;
+      border-radius: 10px;
+      background: #000;
+      margin-top: 12px;
+    }
+    .note {
+      font-size: 0.78rem;
+      color: var(--warn);
+      border-left: 3px solid var(--warn);
+      padding-left: 10px;
+      margin-top: 12px;
+    }
+    footer { font-size: 0.72rem; color: var(--muted); margin-top: 20px; text-align: center; }
+    code { font-size: 0.75em; background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 4px; }
+  </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>TeraBox Multi-Link Bypass Tool</h1>
-        <p>Paste multiple TeraBox links → Get file info & direct download links</p>
-    </header>
+  <h1>Video Link Helper</h1>
+  <p>
+    Yeh <strong>web app</strong> hai — iPhone par Safari se chalti hai.
+    Chrome extension jaisa <strong>har site auto-scan</strong> iOS par <strong>mumkin nahin</strong>.
+  </p>
 
-    <div class="card">
-        <h2>Paste Links</h2>
-        <textarea id="linksInput" placeholder="Paste TeraBox links here (shortlinks or direct links)&#10;&#10;Examples:&#10;https://teraboxlinks.com/xhE3Tf&#10;https://1024terabox.com/s/1bfPm3rB3P7VhFI_X4yJrog&#10;https://www.terabox.app/s/1hKKFxT0lb7FQEbmwre7aaw&#10;&#10;Supports: teraboxlinks.com, terabox.com, 1024terabox.com, terabox.app + more"></textarea>
-
-        <input type="hidden" id="cookieInput" value="">
-
-        <div class="btn-row">
-            <button class="btn btn-primary" id="processBtn" onclick="processLinks()">
-                🔍 Process Links
-            </button>
-            <button class="btn btn-outline" onclick="clearAll()">Clear</button>
-        </div>
+  <div class="card">
+    <label for="u">Yahan <strong>direct</strong> video URL paste karein (jaise <code>.mp4</code>)</label>
+    <textarea id="u" placeholder="https://.../file.mp4" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    <div class="row">
+      <button type="button" id="play">Is page par play</button>
+      <button type="button" id="open" class="secondary">Nayi tab mein kholo</button>
     </div>
-
-    <div id="statsArea" class="stats hidden">
-        <div class="stat">Total: <b id="statTotal">0</b></div>
-        <div class="stat">Files Found: <b id="statFiles" style="color:var(--green)">0</b></div>
-        <div class="stat">Shortlinks: <b id="statShort" style="color:var(--yellow)">0</b></div>
-        <div class="stat">Errors: <b id="statErr" style="color:var(--red)">0</b></div>
+    <video id="v" controls playsinline webkit-playsinline></video>
+    <div class="note">
+      Agar play na ho: CORS / hotlink block ho sakta hai — “Nayi tab” try karein,
+      ya link PC par Chrome extension se nikaal kar paste karein.
     </div>
+  </div>
 
-    <div id="resultsArea" class="results-area"></div>
+  <div class="card">
+    <p style="margin:0 0 8px; color:var(--text); font-weight:600;">Home screen par icon (install jaisa)</p>
+    <ol style="margin:0; padding-left:1.2rem; color:var(--muted); font-size:0.88rem;">
+      <li>Is folder ko <strong>HTTPS</strong> par host karein (GitHub Pages / Netlify — steps <code>IPHONE-INSTALL.txt</code> mein).</li>
+      <li>iPhone <strong>Safari</strong> mein woh https link kholein.</li>
+      <li><strong>Share</strong> → <strong>Add to Home Screen</strong> → Add.</li>
+    </ol>
+    <p style="margin:12px 0 0; font-size:0.82rem; color:var(--muted);">
+      Sirf ZIP/Files se kholo to bhi page chal sakti hai, lekin Home Screen feature poora support har case mein nahin.
+    </p>
+  </div>
 
-    <div id="dlManager" class="dl-manager hidden">
-        <div class="card">
-            <h2>Download Manager</h2>
-            <div id="dlSummary" class="dl-summary">
-                <span>Total: <b id="dlSumTotal">0</b></span>
-                <span>Downloading: <b id="dlSumActive" style="color:var(--blue)">0</b></span>
-                <span>Completed: <b id="dlSumDone">0</b></span>
-                <span>Errors: <b id="dlSumErr" style="color:var(--red)">0</b></span>
-                <span style="margin-left:auto;font-size:.78rem;color:var(--muted)" id="dlDir"></span>
-            </div>
-            <div id="dlList"></div>
-        </div>
-    </div>
-</div>
+  <footer>iphone-pack · Web helper only</footer>
 
-<script>
-function apiUrl(path) {
-    const u = new URL(path, window.location.href);
-    u.username = '';
-    u.password = '';
-    return u.toString();
-}
+  <script>
+    (function () {
+      var inp = document.getElementById("u");
+      var vid = document.getElementById("v");
 
-function formatSize(bytes) {
-    const units = ['B','KB','MB','GB','TB'];
-    let i = 0;
-    let s = bytes;
-    while (s >= 1024 && i < units.length - 1) { s /= 1024; i++; }
-    return s.toFixed(1) + ' ' + units[i];
-}
-
-function formatDuration(sec) {
-    if (!sec) return '';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return m + ':' + String(s).padStart(2, '0');
-}
-
-async function saveCookie() {
-    const cookie = document.getElementById('cookieInput').value.trim();
-    if (!cookie) return;
-    try {
-        const resp = await fetch(apiUrl('/api/set-cookie'), {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({cookie})
-        });
-        const data = await resp.json();
-        const el = document.getElementById('cookieStatus');
-        if (data.success) {
-            el.textContent = '✓ Cookie saved — direct download links will now be available';
-            el.className = 'cookie-status active';
-        } else {
-            el.textContent = '✗ ' + (data.error || 'Failed');
-            el.className = 'cookie-status inactive';
-        }
-    } catch(e) {
-        document.getElementById('cookieStatus').textContent = '✗ Error: ' + e.message;
-    }
-}
-
-async function processLinks() {
-    const input = document.getElementById('linksInput').value.trim();
-    if (!input) return;
-
-    const btn = document.getElementById('processBtn');
-    const resultsArea = document.getElementById('resultsArea');
-    const statsArea = document.getElementById('statsArea');
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Processing...';
-    resultsArea.innerHTML = '';
-    statsArea.classList.add('hidden');
-
-    try {
-        const cookie = document.getElementById('cookieInput').value.trim();
-        const resp = await fetch(apiUrl('/api/resolve'), {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({links: input, cookie})
-        });
-        const data = await resp.json();
-
-        if (!data.success) {
-            resultsArea.innerHTML = '<div class="file-card err"><div class="error-msg">' + (data.error || 'Failed to process links') + '</div></div>';
-            return;
-        }
-
-        let totalFiles = 0, totalShort = 0, totalErr = 0;
-        let html = '';
-
-        for (const r of data.results) {
-            if (r.type === 'terabox' && r.success && r.files && r.files.length > 0) {
-                totalFiles += r.files.length;
-                html += renderFileCard(r);
-            } else if (r.type === 'shortlink' && r.success && r.intermediate_url) {
-                totalShort++;
-                html += renderShortlinkResult(r);
-            } else if (!r.success) {
-                totalErr++;
-                html += renderError(r);
-            } else {
-                totalShort++;
-                html += renderShortlinkResult(r);
-            }
-        }
-
-        // Add Download All button if there are files with dlinks
-        const allDlinks = [];
-        for (const r of data.results) {
-            if (r.type === 'terabox' && r.success && r.files) {
-                for (const f of r.files) {
-                    if (f.dlink) {
-                        allDlinks.push({name: f.name, dlink: f.dlink, surl: r.surl || '', fs_id: f.fs_id || ''});
-                    }
-                }
-            }
-        }
-        if (allDlinks.length > 1) {
-            html = `<div class="file-card" style="border-left-color:var(--blue);text-align:center;padding:14px">
-                <button class="btn btn-green" onclick="fastDownloadAll()" id="downloadAllBtn" style="font-size:1rem;padding:12px 32px">⬇ Fast Download All (${allDlinks.length} files)</button>
-                <button class="btn btn-outline" onclick="copyAllLinks()" style="margin-left:10px">📋 Copy All Links</button>
-            </div>` + html;
-            window._allDlinks = allDlinks;
-        } else if (allDlinks.length === 1) {
-            window._allDlinks = allDlinks;
-        }
-
-        resultsArea.innerHTML = html;
-        document.getElementById('statTotal').textContent = data.total;
-        document.getElementById('statFiles').textContent = totalFiles;
-        document.getElementById('statShort').textContent = totalShort;
-        document.getElementById('statErr').textContent = totalErr;
-        statsArea.classList.remove('hidden');
-
-    } catch(e) {
-        resultsArea.innerHTML = '<div class="file-card err"><div class="error-msg">Network error: ' + e.message + '</div></div>';
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '🔍 Process Links';
-    }
-}
-
-function renderFileCard(r) {
-    let filesHtml = '';
-    for (const f of r.files) {
-        const thumbHtml = f.thumbnail
-            ? `<img class="file-thumb" src="${f.thumbnail}" onerror="this.style.display='none'" />`
-            : '';
-
-        const dur = f.duration ? `<span>Duration: ${formatDuration(f.duration)}</span>` : '';
-        const size = `<span>${f.size_human || formatSize(f.size)}</span>`;
-
-        let actionsHtml = '';
-        if (f.dlink) {
-            actionsHtml += `<button class="btn btn-sm btn-green" onclick="startFastDownload('${encodeURIComponent(f.dlink)}','${encodeURIComponent(f.name)}','${encodeURIComponent(r.surl || '')}','${encodeURIComponent(f.fs_id || '')}')">⬇ Fast Download</button>`;
-            actionsHtml += `<button class="btn btn-sm btn-outline" onclick="copyText('${f.dlink.replace(/'/g,"\\'")}')">Copy DLink</button>`;
-        }
-        actionsHtml += `<a class="btn btn-sm btn-outline" href="${r.share_url || '#'}" target="_blank">Open Page</a>`;
-
-        filesHtml += `
-        <div class="file-row">
-            ${thumbHtml}
-            <div class="file-info">
-                <div class="file-name">${escHtml(f.name)}</div>
-                <div class="file-details">${size} ${dur}</div>
-            </div>
-            <div class="file-actions">${actionsHtml}</div>
-        </div>`;
-    }
-
-    const hasDl = r.has_dlink;
-    const note = hasDl ? '' : '<div class="help-text" style="margin-top:8px">⏳ Direct download links not available — TeraBox may be rate limiting. Try again in a moment.</div>';
-
-    return `
-    <div class="file-card">
-        <div class="file-card-header">
-            <div class="file-card-title">📁 ${r.files.length} file(s) found</div>
-            <div class="file-card-meta">${escHtml(r.original || '')}</div>
-        </div>
-        ${filesHtml}
-        ${note}
-    </div>`;
-}
-
-function renderShortlinkResult(r) {
-    const intermediate = r.intermediate_url || '';
-    return `
-    <div class="shortlink-result">
-        <div class="orig">🔗 ${escHtml(r.original || '')}</div>
-        <div class="resolved">→ ${escHtml(intermediate)}</div>
-        <div class="note">
-            ⚠️ This shortlink is Cloudflare protected. Click below to open in your browser — it will auto-redirect to the TeraBox page.
-            Then copy the TeraBox URL and paste it back here.
-        </div>
-        <div class="btn-row" style="margin-top:8px">
-            <a class="btn btn-sm btn-primary" href="${intermediate}" target="_blank">🌐 Open in Browser</a>
-            <button class="btn btn-sm btn-outline" onclick="copyText('${intermediate.replace(/'/g,"\\'")}')">Copy URL</button>
-        </div>
-    </div>`;
-}
-
-function renderError(r) {
-    return `
-    <div class="file-card err">
-        <div class="orig" style="color:var(--muted);font-size:.8rem">${escHtml(r.original || '')}</div>
-        <div class="error-msg">❌ ${escHtml(r.error || 'Unknown error')}</div>
-    </div>`;
-}
-
-function escHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
-}
-
-function copyText(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        const toast = document.createElement('div');
-        toast.textContent = '✓ Copied!';
-        toast.style.cssText = 'position:fixed;top:20px;right:20px;background:var(--green);color:#111;padding:10px 20px;border-radius:8px;font-weight:600;z-index:9999';
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 1500);
-    });
-}
-
-async function startFastDownload(encodedDlink, encodedName, encodedSurl, encodedFsId) {
-    const dlink = decodeURIComponent(encodedDlink);
-    const filename = decodeURIComponent(encodedName);
-    const surl = encodedSurl ? decodeURIComponent(encodedSurl) : '';
-    const fs_id = encodedFsId ? decodeURIComponent(encodedFsId) : '';
-    try {
-        const resp = await fetch(apiUrl('/api/fast-download'), {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({dlink, filename, surl, fs_id})
-        });
-        const data = await resp.json();
-        if (data.success) {
-            showDlManager();
-            addDlItem(data.task_id, filename);
-            pollDownloadStatus(data.task_id);
-        }
-    } catch(e) {
-        alert('Download error: ' + e.message);
-    }
-}
-
-async function fastDownloadAll() {
-    if (!window._allDlinks || window._allDlinks.length === 0) return;
-    const btn = document.getElementById('downloadAllBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Starting all downloads...'; }
-    try {
-        const resp = await fetch(apiUrl('/api/download-all'), {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({files: window._allDlinks})
-        });
-        const data = await resp.json();
-        if (data.success) {
-            showDlManager();
-            if (data.download_dir) {
-                document.getElementById('dlDir').textContent = 'Saving to: ' + data.download_dir;
-            }
-            for (let i = 0; i < data.task_ids.length; i++) {
-                addDlItem(data.task_ids[i], window._allDlinks[i].name);
-                pollDownloadStatus(data.task_ids[i]);
-            }
-        }
-    } catch(e) {
-        alert('Download error: ' + e.message);
-    }
-    if (btn) { btn.disabled = false; btn.textContent = 'Fast Download All (' + window._allDlinks.length + ' files)'; }
-}
-
-function showDlManager() {
-    document.getElementById('dlManager').classList.remove('hidden');
-    fetch(apiUrl('/api/download-dir')).then(r=>r.json()).then(d=>{
-        document.getElementById('dlDir').textContent = 'Saving to: ' + d.dir;
-    }).catch(()=>{});
-}
-
-function addDlItem(taskId, filename) {
-    const list = document.getElementById('dlList');
-    const existing = document.getElementById('dl-' + taskId);
-    if (existing) return;
-    const div = document.createElement('div');
-    div.className = 'dl-item active';
-    div.id = 'dl-' + taskId;
-    div.innerHTML =
-        '<div class="dl-item-header">' +
-            '<div class="dl-item-name" title="' + escHtml(filename) + '">' + escHtml(filename) + '</div>' +
-            '<div class="dl-item-status queued" id="dlst-' + taskId + '">QUEUED</div>' +
-        '</div>' +
-        '<div class="dl-pct" id="dlpct-' + taskId + '">0%</div>' +
-        '<div class="dl-progress-bar"><div class="dl-progress-fill" id="dlpg-' + taskId + '" style="width:0%"></div></div>' +
-        '<div class="dl-stats-grid">' +
-            '<div class="dl-stat-box"><div class="dl-stat-label">Speed</div><div class="dl-stat-val" id="dlsp-' + taskId + '">--</div></div>' +
-            '<div class="dl-stat-box"><div class="dl-stat-label">Downloaded</div><div class="dl-stat-val" id="dldl-' + taskId + '">0 B</div></div>' +
-            '<div class="dl-stat-box"><div class="dl-stat-label">Total Size</div><div class="dl-stat-val" id="dlsz-' + taskId + '">--</div></div>' +
-            '<div class="dl-stat-box"><div class="dl-stat-label">ETA</div><div class="dl-stat-val" id="dleta-' + taskId + '">--</div></div>' +
-        '</div>';
-    list.prepend(div);
-    updateDlSummary();
-}
-
-function updateDlSummary() {
-    const items = document.querySelectorAll('.dl-item');
-    let total = 0, active = 0, done = 0, err = 0;
-    items.forEach(function(item) {
-        total++;
-        if (item.classList.contains('done')) done++;
-        else if (item.classList.contains('fail')) err++;
-        else active++;
-    });
-    const sumT = document.getElementById('dlSumTotal');
-    const sumA = document.getElementById('dlSumActive');
-    const sumD = document.getElementById('dlSumDone');
-    const sumE = document.getElementById('dlSumErr');
-    if (sumT) sumT.textContent = total;
-    if (sumA) sumA.textContent = active;
-    if (sumD) sumD.textContent = done;
-    if (sumE) sumE.textContent = err;
-}
-
-function formatETA(seconds) {
-    if (!seconds || seconds <= 0 || !isFinite(seconds)) return '--';
-    if (seconds < 60) return Math.ceil(seconds) + 's';
-    if (seconds < 3600) return Math.floor(seconds/60) + 'm ' + Math.ceil(seconds%60) + 's';
-    return Math.floor(seconds/3600) + 'h ' + Math.floor((seconds%3600)/60) + 'm';
-}
-
-function pollDownloadStatus(taskId) {
-    const interval = setInterval(async () => {
+      function cleanUrl() {
+        var s = (inp.value || "").trim();
+        if (!s) return "";
         try {
-            const resp = await fetch(apiUrl('/api/download-status') + '?task_id=' + taskId);
-            const d = await resp.json();
-            const pct = d.total > 0 ? Math.min(100, (d.downloaded / d.total * 100)).toFixed(1) : 0;
-            const pgEl = document.getElementById('dlpg-' + taskId);
-            const stEl = document.getElementById('dlst-' + taskId);
-            const pctEl = document.getElementById('dlpct-' + taskId);
-            const spEl = document.getElementById('dlsp-' + taskId);
-            const dlEl = document.getElementById('dldl-' + taskId);
-            const szEl = document.getElementById('dlsz-' + taskId);
-            const etaEl = document.getElementById('dleta-' + taskId);
-            const itemEl = document.getElementById('dl-' + taskId);
-
-            if (pgEl) pgEl.style.width = pct + '%';
-            if (pctEl) pctEl.textContent = pct + '%';
-            if (dlEl) dlEl.textContent = formatSize(d.downloaded);
-            if (szEl) szEl.textContent = d.total > 0 ? formatSize(d.total) : '--';
-            if (spEl) spEl.textContent = d.speed > 0 ? formatSize(d.speed) + '/s' : '--';
-
-            if (etaEl && d.speed > 0 && d.total > 0) {
-                var remaining = (d.total - d.downloaded) / d.speed;
-                etaEl.textContent = formatETA(remaining);
-            } else if (etaEl) {
-                etaEl.textContent = '--';
-            }
-
-            if (stEl) {
-                if (d.status === 'downloading') {
-                    stEl.textContent = 'DOWNLOADING';
-                    stEl.className = 'dl-item-status downloading';
-                    if (itemEl) { itemEl.className = 'dl-item active'; }
-                }
-                else if (d.status === 'completed') {
-                    stEl.textContent = 'COMPLETED';
-                    stEl.className = 'dl-item-status completed';
-                    if (pctEl) { pctEl.textContent = '100%'; pctEl.className = 'dl-pct done-pct'; }
-                    if (pgEl) { pgEl.style.width = '100%'; pgEl.className = 'dl-progress-fill done-fill'; }
-                    if (etaEl) etaEl.textContent = 'Done';
-                    if (spEl) spEl.textContent = d.total > 0 && d.speed > 0 ? formatSize(d.speed) + '/s avg' : '--';
-                    if (itemEl) { itemEl.className = 'dl-item done'; }
-                }
-                else if (d.status === 'retrying') {
-                    var retryNum = d.retries || 0;
-                    stEl.textContent = 'SWITCHING CDN #' + retryNum;
-                    stEl.className = 'dl-item-status retrying';
-                    if (pctEl) { pctEl.textContent = 'Slow speed detected...'; pctEl.style.fontSize = '1rem'; }
-                    if (pgEl) { pgEl.style.width = '0%'; }
-                    if (etaEl) etaEl.textContent = 'Retrying';
-                    if (spEl) spEl.textContent = 'Switching...';
-                    if (itemEl) { itemEl.className = 'dl-item active'; }
-                }
-                else if (d.status === 'error') {
-                    stEl.textContent = 'ERROR';
-                    stEl.className = 'dl-item-status error';
-                    if (etaEl) etaEl.textContent = 'Failed';
-                    if (itemEl) { itemEl.className = 'dl-item fail'; }
-                }
-                else {
-                    stEl.textContent = d.status.toUpperCase();
-                    stEl.className = 'dl-item-status queued';
-                }
-            }
-
-            if (d.status === 'completed' || d.status === 'error') {
-                clearInterval(interval);
-                updateDlSummary();
-            }
-        } catch(e) {
-            clearInterval(interval);
+          var u = new URL(s);
+          if (u.protocol !== "http:" && u.protocol !== "https:") return "";
+          return u.href;
+        } catch (e) {
+          return "";
         }
-    }, 500);
-}
+      }
 
-function copyAllLinks() {
-    if (!window._allDlinks || window._allDlinks.length === 0) return;
-    const text = window._allDlinks.map(d => d.dlink).join('\n');
-    copyText(text);
-}
+      document.getElementById("play").addEventListener("click", function () {
+        var url = cleanUrl();
+        if (!url) {
+          alert("Theek https://... URL paste karein.");
+          return;
+        }
+        vid.removeAttribute("src");
+        vid.pause();
+        vid.src = url;
+        vid.load();
+        vid.play().catch(function () {});
+      });
 
-function clearAll() {
-    document.getElementById('linksInput').value = '';
-    document.getElementById('resultsArea').innerHTML = '';
-    document.getElementById('statsArea').classList.add('hidden');
-    document.getElementById('dlManager').classList.add('hidden');
-    document.getElementById('dlList').innerHTML = '';
-    window._allDlinks = [];
-}
-</script>
+      document.getElementById("open").addEventListener("click", function () {
+        var url = cleanUrl();
+        if (!url) {
+          alert("Theek https://... URL paste karein.");
+          return;
+        }
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+    })();
+  </script>
 </body>
 </html>
