@@ -1,0 +1,13 @@
+[project]
+name = "terabox-bypass-tool"
+version = "1.0.0"
+description = "Multi-link TeraBox shortlink bypass and fast download tool"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "curl_cffi>=0.7.0",
+]
+
+[project.scripts]
+terabox-tool = "app:main"
